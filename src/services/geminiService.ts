@@ -26,8 +26,8 @@ export const interpretReading = async (
   deckType: DeckType,
   userInfo: UserInfo
 ): Promise<string> => {
-  // Use gemini-3.1-pro-preview as the primary model for best reasoning
-  const models = ["gemini-3.1-pro-preview", "gemini-3-flash-preview"];
+  // Use gemini-3-flash-preview as the primary model for best speed and higher free limits
+  const models = ["gemini-3-flash-preview", "gemini-3.1-pro-preview"];
   
   const cardsInfo = drawnCards.map((c, i) => {
     const pos = c.positionName ? ` (Vị trí: ${c.positionName === 'Past' ? 'Quá khứ' : c.positionName === 'Present' ? 'Hiện tại' : 'Tương lai'})` : '';

@@ -16,8 +16,10 @@ interface ReadingScreenProps {
 }
 
 const ReadingScreen: React.FC<ReadingScreenProps> = ({ userInfo, deckType, onReset }) => {
-  const [step, setStep] = useState<'theme' | 'question' | 'spread' | 'shuffle' | 'result'>('theme');
-  const [theme, setTheme] = useState<ReadingTheme>(ReadingTheme.OVERVIEW);
+  const [step, setStep] = useState<'question' | 'spread' | 'shuffle' | 'result'>(
+    userInfo.request?.trim() ? 'spread' : 'question'
+  );
+  const [theme] = useState<ReadingTheme>(ReadingTheme.OVERVIEW);
   const [question, setQuestion] = useState(userInfo.request || '');
   const [spreadType, setSpreadType] = useState<SpreadType>(SpreadType.ONE_CARD);
   const [drawnCards, setDrawnCards] = useState<DrawnCard[]>([]);
@@ -68,7 +70,7 @@ const ReadingScreen: React.FC<ReadingScreenProps> = ({ userInfo, deckType, onRes
   };
 
   const reset = () => {
-    setStep('theme');
+    setStep(userInfo.request?.trim() ? 'spread' : 'question');
     setQuestion(userInfo.request || '');
     setDrawnCards([]);
     setAiInterpretation(null);
@@ -78,38 +80,6 @@ const ReadingScreen: React.FC<ReadingScreenProps> = ({ userInfo, deckType, onRes
   return (
     <div className="min-h-screen pt-20 pb-10 px-4 max-w-4xl mx-auto flex flex-col items-center">
       <AnimatePresence mode="wait">
-        {step === 'theme' && (
-          <motion.div
-            key="theme"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="w-full text-center"
-          >
-            <div className="mb-8">
-              <h2 className="text-3xl font-serif mb-2 text-purple-200">Chào {userInfo.fullName},</h2>
-              <p className="text-purple-300/60 italic">Hãy chọn chủ đề bạn muốn khám phá hôm nay</p>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { type: ReadingTheme.LOVE, icon: Heart, label: 'Tình yêu', color: 'text-pink-400' },
-                { type: ReadingTheme.STUDY, icon: Book, label: 'Học tập', color: 'text-blue-400' },
-                { type: ReadingTheme.CAREER, icon: Briefcase, label: 'Sự nghiệp', color: 'text-yellow-400' },
-                { type: ReadingTheme.OVERVIEW, icon: Globe, label: 'Tổng quan', color: 'text-purple-400' },
-              ].map((item) => (
-                <button
-                  key={item.type}
-                  onClick={() => handleThemeSelect(item.type)}
-                  className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-purple-500/50 transition-all group"
-                >
-                  <item.icon className={`w-10 h-10 mx-auto mb-3 ${item.color} group-hover:scale-110 transition-transform`} />
-                  <span className="block text-sm font-medium tracking-wider uppercase">{item.label}</span>
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
         {step === 'question' && (
           <motion.div
             key="question"
@@ -118,9 +88,6 @@ const ReadingScreen: React.FC<ReadingScreenProps> = ({ userInfo, deckType, onRes
             exit={{ opacity: 0, x: -20 }}
             className="w-full max-w-md"
           >
-            <button onClick={() => setStep('theme')} className="flex items-center text-purple-300 mb-6 hover:text-purple-100 transition-colors">
-              <ArrowLeft className="w-4 h-4 mr-2" /> Quay lại
-            </button>
             <h2 className="text-3xl font-serif mb-4 text-purple-200">Bạn đang nghĩ gì?</h2>
             <p className="text-purple-300/60 mb-8 text-sm italic">Hãy tập trung vào câu hỏi của bạn...</p>
             <form onSubmit={handleQuestionSubmit} className="relative">
@@ -151,7 +118,7 @@ const ReadingScreen: React.FC<ReadingScreenProps> = ({ userInfo, deckType, onRes
             className="w-full text-center"
           >
             <button onClick={() => setStep('question')} className="flex items-center text-purple-300 mb-6 hover:text-purple-100 transition-colors mx-auto">
-              <ArrowLeft className="w-4 h-4 mr-2" /> Quay lại
+              <ArrowLeft className="w-4 h-4 mr-2" /> Chỉnh sửa câu hỏi
             </button>
             <h2 className="text-3xl font-serif mb-8 text-purple-200">Chọn kiểu trải bài</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

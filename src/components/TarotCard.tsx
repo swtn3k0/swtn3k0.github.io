@@ -67,11 +67,11 @@ const TarotCard: React.FC<TarotCardProps> = ({
         >
           {card && (
             <>
-              <div className={`w-full h-full relative overflow-hidden rounded-lg ${isReversed ? 'rotate-180' : ''}`}>
+              <div className="w-full h-full relative overflow-hidden rounded-lg">
                 <img
                   src={card.image}
                   alt={card.name}
-                  className={`w-full h-full ${isPlayingCard ? 'object-contain' : 'object-cover'}`}
+                  className={`w-full h-full ${isPlayingCard ? 'object-contain' : 'object-cover'} ${isReversed ? 'rotate-180' : ''}`}
                   referrerPolicy="no-referrer"
                 />
                 {!isPlayingCard && <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />}
