@@ -4,9 +4,18 @@ import CosmicBackground from './components/CosmicBackground';
 import HomeScreen from './components/HomeScreen';
 import ReadingScreen from './components/ReadingScreen';
 import { Sparkles, Info } from 'lucide-react';
+import { DeckType, UserInfo } from './types';
 
 export default function App() {
   const [view, setView] = useState<'home' | 'reading'>('home');
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [deckType, setDeckType] = useState<DeckType>(DeckType.TAROT);
+
+  const handleStart = (info: UserInfo, type: DeckType) => {
+    setUserInfo(info);
+    setDeckType(type);
+    setView('reading');
+  };
 
   return (
     <div className="relative min-h-screen bg-black text-white selection:bg-purple-500/30">
@@ -40,18 +49,22 @@ export default function App() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <HomeScreen onStart={() => setView('reading')} />
+              <HomeScreen onStart={handleStart} />
             </motion.div>
           )}
 
-          {view === 'reading' && (
+          {view === 'reading' && userInfo && (
             <motion.div
               key="reading"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <ReadingScreen />
+              <ReadingScreen 
+                userInfo={userInfo} 
+                deckType={deckType} 
+                onReset={() => setView('home')}
+              />
             </motion.div>
           )}
         </AnimatePresence>

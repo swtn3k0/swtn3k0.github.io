@@ -1,17 +1,24 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { SpreadType, ReadingTheme, DrawnCard, TarotCard as TarotCardType } from '../types';
+import { SpreadType, ReadingTheme, DrawnCard, TarotCard as TarotCardType, UserInfo, DeckType } from '../types';
 import { tarotCards } from '../data/tarotCards';
+import { playingCards } from '../data/playingCards';
 import ShuffleDeck from './ShuffleDeck';
 import TarotCard from './TarotCard';
 import { interpretReading } from '../services/geminiService';
 import { Sparkles, Heart, Book, Briefcase, Globe, ArrowLeft, Send } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
-const ReadingScreen: React.FC = () => {
+interface ReadingScreenProps {
+  userInfo: UserInfo;
+  deckType: DeckType;
+  onReset: () => void;
+}
+
+const ReadingScreen: React.FC<ReadingScreenProps> = ({ userInfo, deckType, onReset }) => {
   const [step, setStep] = useState<'theme' | 'question' | 'spread' | 'shuffle' | 'result'>('theme');
   const [theme, setTheme] = useState<ReadingTheme>(ReadingTheme.OVERVIEW);
-  const [question, setQuestion] = useState('');
+  const [question, setQuestion] = useState(userInfo.request || '');
   const [spreadType, setSpreadType] = useState<SpreadType>(SpreadType.ONE_CARD);
   const [drawnCards, setDrawnCards] = useState<DrawnCard[]>([]);
   const [isShuffling, setIsShuffling] = useState(false);
@@ -39,7 +46,8 @@ const ReadingScreen: React.FC = () => {
 
   const handleDraw = () => {
     const count = spreadType === SpreadType.ONE_CARD ? 1 : spreadType === SpreadType.THREE_CARDS ? 3 : 10;
-    const shuffled = [...tarotCards].sort(() => Math.random() - 0.5);
+    const deck = deckType === DeckType.TAROT ? tarotCards : playingCards;
+    const shuffled = [...deck].sort(() => Math.random() - 0.5);
     const selected = shuffled.slice(0, count).map((card, i) => {
       const isReversed = Math.random() > 0.7;
       let positionName = '';
@@ -53,7 +61,7 @@ const ReadingScreen: React.FC = () => {
     
     // Start AI interpretation
     setIsInterpreting(true);
-    interpretReading(question, theme, spreadType, selected).then((res) => {
+    interpretReading(question, theme, spreadType, selected, deckType, userInfo).then((res) => {
       setAiInterpretation(res);
       setIsInterpreting(false);
     });
@@ -61,9 +69,10 @@ const ReadingScreen: React.FC = () => {
 
   const reset = () => {
     setStep('theme');
-    setQuestion('');
+    setQuestion(userInfo.request || '');
     setDrawnCards([]);
     setAiInterpretation(null);
+    onReset();
   };
 
   return (
@@ -77,7 +86,10 @@ const ReadingScreen: React.FC = () => {
             exit={{ opacity: 0, y: -20 }}
             className="w-full text-center"
           >
-            <h2 className="text-3xl font-serif mb-8 text-purple-200">Chọn chủ đề của bạn</h2>
+            <div className="mb-8">
+              <h2 className="text-3xl font-serif mb-2 text-purple-200">Chào {userInfo.fullName},</h2>
+              <p className="text-purple-300/60 italic">Hãy chọn chủ đề bạn muốn khám phá hôm nay</p>
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 { type: ReadingTheme.LOVE, icon: Heart, label: 'Tình yêu', color: 'text-pink-400' },

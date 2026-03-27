@@ -4,6 +4,16 @@ export enum Suit {
   CUPS = 'Cups',
   SWORDS = 'Swords',
   PENTACLES = 'Pentacles',
+  // Playing Card Suits
+  HEARTS = 'Hearts',
+  DIAMONDS = 'Diamonds',
+  CLUBS = 'Clubs',
+  SPADES = 'Spades',
+}
+
+export enum DeckType {
+  TAROT = 'TAROT',
+  PLAYING_CARDS = 'PLAYING_CARDS',
 }
 
 export interface TarotCard {
@@ -30,6 +40,12 @@ export enum ReadingTheme {
   OVERVIEW = 'OVERVIEW',
 }
 
+export interface UserInfo {
+  fullName: string;
+  birthYear: string;
+  request?: string;
+}
+
 export interface DrawnCard {
   card: TarotCard;
   isReversed: boolean;
@@ -43,6 +59,8 @@ export interface ReadingResult {
   question: string;
   theme: ReadingTheme;
   spreadType: SpreadType;
+  deckType: DeckType;
+  userInfo: UserInfo;
   drawnCards: DrawnCard[];
   aiInterpretation?: string;
 }

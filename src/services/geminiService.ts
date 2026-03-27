@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import { ReadingResult, DrawnCard, ReadingTheme, SpreadType } from '../types';
+import { ReadingResult, DrawnCard, ReadingTheme, SpreadType, DeckType, UserInfo } from '../types';
 
 // Use a function to get the AI instance to ensure it uses the latest API key
 const getAI = () => {
@@ -22,21 +22,30 @@ export const interpretReading = async (
   question: string,
   theme: ReadingTheme,
   spreadType: SpreadType,
-  drawnCards: DrawnCard[]
+  drawnCards: DrawnCard[],
+  deckType: DeckType,
+  userInfo: UserInfo
 ): Promise<string> => {
-  // Prioritize gemini-1.5-flash for stability
-  const models = ["gemini-1.5-flash", "gemini-3-flash-preview"];
+  // Use gemini-3.1-pro-preview as the primary model for best reasoning
+  const models = ["gemini-3.1-pro-preview", "gemini-3-flash-preview"];
   
   const cardsInfo = drawnCards.map((c, i) => {
     const pos = c.positionName ? ` (Vị trí: ${c.positionName === 'Past' ? 'Quá khứ' : c.positionName === 'Present' ? 'Hiện tại' : 'Tương lai'})` : '';
     return `${i + 1}. ${c.card.name}${c.isReversed ? ' (Ngược)' : ' (Xuôi)'}${pos}: ${c.isReversed ? c.card.meaningReversed : c.card.meaningUpright}`;
   }).join('\n');
 
+  const deckName = deckType === DeckType.TAROT ? 'Tarot' : 'Bài Tây (Playing Cards)';
+
   const prompt = `
-    Bạn là một chuyên gia giải bài Tarot với giọng văn huyền bí, sâu sắc và thông thái.
-    Hãy phân tích trải bài Tarot sau đây cho người dùng.
+    Bạn là một chuyên gia giải bài ${deckName} với giọng văn huyền bí, sâu sắc và thông thái.
+    Hãy phân tích trải bài ${deckName} sau đây cho người dùng.
     
-    Câu hỏi của người dùng: "${question}"
+    Thông tin người xem:
+    - Họ và tên: ${userInfo.fullName}
+    - Năm sinh: ${userInfo.birthYear}
+    - Nhu cầu/Câu hỏi cụ thể: "${userInfo.request || 'Không có'}"
+    
+    Câu hỏi của người dùng cho trải bài này: "${question}"
     Chủ đề: ${theme}
     Kiểu trải bài: ${spreadType}
     
@@ -46,6 +55,7 @@ export const interpretReading = async (
     Vui lòng cung cấp một lời giải mã cá nhân hóa, sâu sắc và có chiều sâu cho trải bài này.
     Hãy kết nối các lá bài lại với nhau để tạo thành một câu chuyện hoặc lời hướng dẫn mạch lạc.
     Sử dụng tông giọng khuyến khích nhưng trung thực, mang lại cảm giác bí ẩn và trí tuệ.
+    Xưng hô với người xem bằng tên của họ (${userInfo.fullName}) một cách trang trọng nhưng gần gũi.
     Giữ cho câu trả lời súc tích nhưng có tác động mạnh mẽ (khoảng 200-300 từ).
     Định dạng đầu ra bằng Markdown.
     PHẢI TRẢ LỜI BẰNG TIẾNG VIỆT.
