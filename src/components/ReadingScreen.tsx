@@ -191,6 +191,7 @@ const ReadingScreen: React.FC<ReadingScreenProps> = ({ userInfo, deckType, onRes
               isShuffling={isShuffling}
               count={spreadType === SpreadType.ONE_CARD ? 1 : spreadType === SpreadType.THREE_CARDS ? 3 : 10}
               onDraw={handleDraw}
+              deckType={deckType}
             />
           </motion.div>
         )}
@@ -221,6 +222,7 @@ const ReadingScreen: React.FC<ReadingScreenProps> = ({ userInfo, deckType, onRes
                     card={drawn.card}
                     isReversed={drawn.isReversed}
                     isFlipped={true}
+                    deckType={deckType}
                     className="scale-90 md:scale-100"
                   />
                   <div className="mt-6 text-center max-w-[200px]">

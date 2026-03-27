@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { TarotCard as TarotCardType } from '../types';
+import { TarotCard as TarotCardType, DeckType } from '../types';
 import TarotCard from './TarotCard';
 
 interface ShuffleDeckProps {
   onDraw: (count: number) => void;
   count: number;
   isShuffling: boolean;
+  deckType?: DeckType;
 }
 
-const ShuffleDeck: React.FC<ShuffleDeckProps> = ({ onDraw, count, isShuffling }) => {
+const ShuffleDeck: React.FC<ShuffleDeckProps> = ({ onDraw, count, isShuffling, deckType }) => {
   const [cards, setCards] = useState<number[]>(Array.from({ length: 22 }, (_, i) => i));
   const [isDrawing, setIsDrawing] = useState(false);
 
@@ -52,7 +53,7 @@ const ShuffleDeck: React.FC<ShuffleDeckProps> = ({ onDraw, count, isShuffling })
               mass: 1,
             }}
           >
-            <TarotCard isFlipped={false} className="w-40 h-60" />
+            <TarotCard isFlipped={false} className="w-40 h-60" deckType={deckType} />
           </motion.div>
         ))}
       </AnimatePresence>
