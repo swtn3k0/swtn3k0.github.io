@@ -3,23 +3,9 @@ import { ReadingResult, DrawnCard, ReadingTheme, SpreadType } from '../types';
 
 // Use a function to get the AI instance to ensure it uses the latest API key
 const getAI = () => {
-  // Use the provided key for GitHub Pages deployment
-  const hardcodedKey = "AIzaSyC53bsor-DXlNEMPKWYJbrj9dZCyk-IS-8";
-  
-  let apiKey = "";
-  try {
-    // Vite's define might make this a string or a direct value
-    apiKey = String(process.env.GEMINI_API_KEY);
-  } catch (e) {
-    apiKey = "";
-  }
-
-  // Handle various "empty" states from build environment
-  if (!apiKey || apiKey === "undefined" || apiKey === "null" || apiKey === "" || apiKey === "MY_GEMINI_API_KEY") {
-    apiKey = hardcodedKey;
-  }
-  
-  return new GoogleGenAI({ apiKey: apiKey.trim() });
+  // Directly use the provided key for maximum reliability on GitHub Pages
+  const apiKey = "AIzaSyC53bsor-DXlNEMPKWYJbrj9dZCyk-IS-8";
+  return new GoogleGenAI({ apiKey: apiKey });
 };
 
 export const interpretReading = async (
@@ -28,7 +14,7 @@ export const interpretReading = async (
   spreadType: SpreadType,
   drawnCards: DrawnCard[]
 ): Promise<string> => {
-  // Prioritize gemini-1.5-flash as it's the most widely available and stable across all regions/keys
+  // Prioritize gemini-1.5-flash for stability
   const models = ["gemini-1.5-flash", "gemini-3-flash-preview"];
   
   const cardsInfo = drawnCards.map((c, i) => {
@@ -55,7 +41,7 @@ export const interpretReading = async (
     PHẢI TRẢ LỜI BẰNG TIẾNG VIỆT.
   `;
 
-  let lastError = null;
+  let lastError: any = null;
   for (const model of models) {
     try {
       const ai = getAI();
@@ -75,9 +61,15 @@ export const interpretReading = async (
 
   console.error("All Gemini models failed:", lastError);
   
-  if (lastError?.message?.includes("API_KEY_INVALID")) {
+  const errorMessage = lastError?.message || "Không rõ nguyên nhân";
+  
+  if (errorMessage.includes("API_KEY_INVALID")) {
     return "Lỗi: Khóa API không hợp lệ. Vui lòng kiểm tra lại khóa bạn đã cung cấp.";
   }
   
-  return "Kết nối với vũ trụ bị gián đoạn. Vui lòng thử lại sau.";
+  if (errorMessage.includes("location not supported")) {
+    return "Lỗi: Dịch vụ AI chưa hỗ trợ vùng lãnh thổ của bạn. Vui lòng thử dùng VPN.";
+  }
+  
+  return `Kết nối với vũ trụ bị gián đoạn. Chi tiết lỗi: ${errorMessage.substring(0, 100)}...`;
 };
