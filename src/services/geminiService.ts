@@ -3,9 +3,14 @@ import { ReadingResult, DrawnCard, ReadingTheme, SpreadType } from '../types';
 
 // Use a function to get the AI instance to ensure it uses the latest API key
 const getAI = () => {
-  // Directly use the provided key for maximum reliability on GitHub Pages
-  const apiKey = "AIzaSyC53bsor-DXlNEMPKWYJbrj9dZCyk-IS-8";
-  return new GoogleGenAI({ apiKey: apiKey });
+  // Get key from localStorage to avoid leaking it in the source code
+  const storedKey = localStorage.getItem('gemini_api_key');
+  
+  if (!storedKey) {
+    throw new Error("MISSING_KEY");
+  }
+  
+  return new GoogleGenAI({ apiKey: storedKey });
 };
 
 export const interpretReading = async (
@@ -61,10 +66,14 @@ export const interpretReading = async (
 
   console.error("All Gemini models failed:", lastError);
   
-  const errorMessage = lastError?.message || "Không rõ nguyên nhân";
+  const errorMessage = lastError?.message || "";
   
-  if (errorMessage.includes("API_KEY_INVALID")) {
-    return "Lỗi: Khóa API không hợp lệ. Vui lòng kiểm tra lại khóa bạn đã cung cấp.";
+  if (lastError instanceof Error && lastError.message === "MISSING_KEY") {
+    return "Vui lòng nhấn vào biểu tượng Cài đặt (bánh răng) để nhập khóa API mới của bạn.";
+  }
+  
+  if (errorMessage.includes("API_KEY_INVALID") || errorMessage.includes("leaked")) {
+    return "Lỗi: Khóa API không hợp lệ hoặc đã bị lộ. Vui lòng cập nhật khóa mới trong phần Cài đặt.";
   }
   
   if (errorMessage.includes("location not supported")) {
