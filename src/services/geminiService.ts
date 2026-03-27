@@ -3,14 +3,25 @@ import { ReadingResult, DrawnCard, ReadingTheme, SpreadType } from '../types';
 
 // Use a function to get the AI instance to ensure it uses the latest API key
 const getAI = () => {
-  // Get key from localStorage to avoid leaking it in the source code
-  const storedKey = localStorage.getItem('gemini_api_key');
+  // 1. Try to get key from environment (injected during build)
+  // 2. Fallback to localStorage (if user provided one manually)
   
-  if (!storedKey) {
+  let apiKey = "";
+  try {
+    apiKey = String(process.env.GEMINI_API_KEY);
+  } catch (e) {
+    apiKey = "";
+  }
+
+  if (!apiKey || apiKey === "undefined" || apiKey === "null" || apiKey === "" || apiKey === "MY_GEMINI_API_KEY") {
+    apiKey = localStorage.getItem('gemini_api_key') || "";
+  }
+  
+  if (!apiKey) {
     throw new Error("MISSING_KEY");
   }
   
-  return new GoogleGenAI({ apiKey: storedKey });
+  return new GoogleGenAI({ apiKey: apiKey.trim() });
 };
 
 export const interpretReading = async (
