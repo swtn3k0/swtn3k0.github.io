@@ -3,9 +3,7 @@ import { ReadingResult, DrawnCard, ReadingTheme, SpreadType } from '../types';
 
 // Use a function to get the AI instance to ensure it uses the latest API key
 const getAI = () => {
-  // 1. Try to get key from environment (injected during build)
-  // 2. Fallback to localStorage (if user provided one manually)
-  
+  // Get key from environment (injected during build via GitHub Secrets)
   let apiKey = "";
   try {
     apiKey = String(process.env.GEMINI_API_KEY);
@@ -14,10 +12,6 @@ const getAI = () => {
   }
 
   if (!apiKey || apiKey === "undefined" || apiKey === "null" || apiKey === "" || apiKey === "MY_GEMINI_API_KEY") {
-    apiKey = localStorage.getItem('gemini_api_key') || "";
-  }
-  
-  if (!apiKey) {
     throw new Error("MISSING_KEY");
   }
   
@@ -80,11 +74,11 @@ export const interpretReading = async (
   const errorMessage = lastError?.message || "";
   
   if (lastError instanceof Error && lastError.message === "MISSING_KEY") {
-    return "Vui lòng nhấn vào biểu tượng Cài đặt (bánh răng) để nhập khóa API mới của bạn.";
+    return "Lỗi: Không tìm thấy khóa API. Vui lòng kiểm tra cấu hình GitHub Secrets.";
   }
   
   if (errorMessage.includes("API_KEY_INVALID") || errorMessage.includes("leaked")) {
-    return "Lỗi: Khóa API không hợp lệ hoặc đã bị lộ. Vui lòng cập nhật khóa mới trong phần Cài đặt.";
+    return "Lỗi: Khóa API không hợp lệ hoặc đã bị lộ. Vui lòng cập nhật khóa mới trong GitHub Secrets.";
   }
   
   if (errorMessage.includes("location not supported")) {
