@@ -3,11 +3,14 @@ import { ReadingResult, DrawnCard, ReadingTheme, SpreadType } from '../types';
 
 // Use a function to get the AI instance to ensure it uses the latest API key
 const getAI = () => {
-  const apiKey = process.env.GEMINI_API_KEY;
+  // Use the provided key for GitHub Pages deployment
+  const hardcodedKey = "AIzaSyC53bsor-DXlNEMPKWYJbrj9dZCyk-IS-8";
+  const apiKey = process.env.GEMINI_API_KEY || hardcodedKey;
+  
   if (!apiKey || apiKey === "MY_GEMINI_API_KEY") {
     console.warn("Gemini API key is missing or using placeholder.");
   }
-  return new GoogleGenAI({ apiKey: apiKey || "" });
+  return new GoogleGenAI({ apiKey: apiKey });
 };
 
 export const interpretReading = async (
