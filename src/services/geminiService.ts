@@ -5,12 +5,21 @@ import { ReadingResult, DrawnCard, ReadingTheme, SpreadType } from '../types';
 const getAI = () => {
   // Use the provided key for GitHub Pages deployment
   const hardcodedKey = "AIzaSyC53bsor-DXlNEMPKWYJbrj9dZCyk-IS-8";
-  const apiKey = process.env.GEMINI_API_KEY || hardcodedKey;
   
-  if (!apiKey || apiKey === "MY_GEMINI_API_KEY") {
-    console.warn("Gemini API key is missing or using placeholder.");
+  let apiKey = "";
+  try {
+    // Vite's define might make this a string or a direct value
+    apiKey = String(process.env.GEMINI_API_KEY);
+  } catch (e) {
+    apiKey = "";
   }
-  return new GoogleGenAI({ apiKey: apiKey });
+
+  // Handle various "empty" states from build environment
+  if (!apiKey || apiKey === "undefined" || apiKey === "null" || apiKey === "" || apiKey === "MY_GEMINI_API_KEY") {
+    apiKey = hardcodedKey;
+  }
+  
+  return new GoogleGenAI({ apiKey: apiKey.trim() });
 };
 
 export const interpretReading = async (
@@ -19,8 +28,8 @@ export const interpretReading = async (
   spreadType: SpreadType,
   drawnCards: DrawnCard[]
 ): Promise<string> => {
-  // Using gemini-3-flash-preview as recommended for basic text tasks
-  const model = "gemini-3-flash-preview";
+  // Prioritize gemini-1.5-flash as it's the most widely available and stable across all regions/keys
+  const models = ["gemini-1.5-flash", "gemini-3-flash-preview"];
   
   const cardsInfo = drawnCards.map((c, i) => {
     const pos = c.positionName ? ` (Vị trí: ${c.positionName === 'Past' ? 'Quá khứ' : c.positionName === 'Present' ? 'Hiện tại' : 'Tương lai'})` : '';
@@ -46,27 +55,29 @@ export const interpretReading = async (
     PHẢI TRẢ LỜI BẰNG TIẾNG VIỆT.
   `;
 
-  try {
-    const ai = getAI();
-    const response = await ai.models.generateContent({
-      model,
-      contents: prompt,
-    });
-    
-    if (!response.text) {
-      console.error("Gemini returned empty response:", response);
-      return "Các vì sao đang im lặng. Vui lòng thử lại sau.";
+  let lastError = null;
+  for (const model of models) {
+    try {
+      const ai = getAI();
+      const response = await ai.models.generateContent({
+        model,
+        contents: prompt,
+      });
+      
+      if (response.text) {
+        return response.text;
+      }
+    } catch (error: any) {
+      console.warn(`Model ${model} failed:`, error);
+      lastError = error;
     }
-    
-    return response.text;
-  } catch (error: any) {
-    console.error("Gemini Error Details:", error);
-    
-    // Check for specific error messages
-    if (error.message?.includes("API_KEY_INVALID")) {
-      return "Lỗi: Khóa API không hợp lệ. Vui lòng kiểm tra cấu hình trong phần Secrets.";
-    }
-    
-    return "Kết nối với vũ trụ bị gián đoạn. Vui lòng thử lại sau.";
   }
+
+  console.error("All Gemini models failed:", lastError);
+  
+  if (lastError?.message?.includes("API_KEY_INVALID")) {
+    return "Lỗi: Khóa API không hợp lệ. Vui lòng kiểm tra lại khóa bạn đã cung cấp.";
+  }
+  
+  return "Kết nối với vũ trụ bị gián đoạn. Vui lòng thử lại sau.";
 };
