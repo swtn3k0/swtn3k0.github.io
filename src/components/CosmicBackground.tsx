@@ -1,7 +1,9 @@
 import React, { useEffect, useRef } from 'react';
+import { useSettings } from '../contexts/SettingsContext';
 
 const CosmicBackground: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { settings } = useSettings();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -49,21 +51,20 @@ const CosmicBackground: React.FC = () => {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // Draw stars
-      stars.forEach((star) => {
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
-        ctx.fill();
+      if (settings.effectsEnabled) {
+        stars.forEach((star) => {
+          ctx.beginPath();
+          ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
+          ctx.fill();
 
-        // Animate star
-        star.opacity += star.speed;
-        if (star.opacity > 1 || star.opacity < 0) {
-          star.speed = -star.speed;
-        }
-      });
-
-      // Subtle nebula clouds (optional, could be heavy)
-      // For now, just stars and gradient is clean
+          // Animate star
+          star.opacity += star.speed;
+          if (star.opacity > 1 || star.opacity < 0) {
+            star.speed = -star.speed;
+          }
+        });
+      }
 
       animationFrameId = requestAnimationFrame(draw);
     };

@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { TarotCard as TarotCardType, DeckType } from '../types';
+import { useSettings } from '../contexts/SettingsContext';
 
 interface TarotCardProps {
   card?: TarotCardType;
@@ -22,6 +23,7 @@ const TarotCard: React.FC<TarotCardProps> = ({
   index = 0,
 }) => {
   const isPlayingCard = deckType === DeckType.PLAYING_CARDS;
+  const { settings } = useSettings();
 
   return (
     <div
@@ -60,8 +62,8 @@ const TarotCard: React.FC<TarotCardProps> = ({
 
         {/* Front of the card */}
         <div
-          className={`absolute inset-0 w-full h-full backface-hidden rounded-xl border-2 flex flex-col items-center p-2 shadow-2xl overflow-hidden ${
-            isPlayingCard ? 'border-blue-400 bg-white' : 'border-purple-400 bg-black'
+          className={`absolute inset-0 w-full h-full backface-hidden rounded-xl border-2 flex flex-col items-center p-2 shadow-2xl overflow-hidden transition-colors duration-300 ${
+            isPlayingCard ? 'border-blue-400 bg-white' : 'border-purple-400 bg-black dark:bg-black'
           }`}
           style={{ transform: 'rotateY(180deg)' }}
         >

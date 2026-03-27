@@ -18,8 +18,26 @@
   }
 }
 
+:root {
+  --bg-color: #ffffff;
+  --text-color: #1a1a1a;
+  --accent-color: #7c3aed;
+  --card-bg: rgba(0, 0, 0, 0.05);
+  --border-color: rgba(0, 0, 0, 0.1);
+}
+
+.dark {
+  --bg-color: #000000;
+  --text-color: #ffffff;
+  --accent-color: #a78bfa;
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --border-color: rgba(255, 255, 255, 0.1);
+}
+
 body {
-  @apply bg-black text-white overflow-x-hidden;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  @apply overflow-x-hidden transition-colors duration-300;
   font-family: var(--font-sans);
 }
 

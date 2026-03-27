@@ -46,6 +46,11 @@ export interface UserInfo {
   request?: string;
 }
 
+export interface AppSettings {
+  theme: 'light' | 'dark';
+  effectsEnabled: boolean;
+}
+
 export interface DrawnCard {
   card: TarotCard;
   isReversed: boolean;
